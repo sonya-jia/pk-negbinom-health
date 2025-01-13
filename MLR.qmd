@@ -37,13 +37,11 @@ The response variable is the depression score. The predictor variable is whether
 
 b\)
 
-CHECK IN OFFICE HOURS
+The most obviously violated assumption is independence since we collect patient depression scores across multiple visits. We expect a person's data to be correlated with their previous visits.
 
-The constant variance assumption is likely violated since we expect there could be more variation in postnatal depression of those who do not use the estrogen patch versus those who do use it.
+In addition, the constant variance assumption is likely violated since we expect there could be more variation in postnatal depression of those who do not use the estrogen patch versus those who do use it.
 
-The linearity condition is not necessarily satisfied either since ....
-
-The normality assumption is also likely to be violated since....
+Depending on what the depression score metric looks like, the normality condition could also be violated since we may have have depression scores that are more frequent on extreme ends of a metric like a lot of people that are highly depressed or not depressed. It's also hard to imagine a continuous equivalent or approximation of depression score that would look like a normal distribution.
 
 ## Exercise 3
 
@@ -209,8 +207,8 @@ There are `{r} dof` degrees of freedom in the estimate of the regression standar
 
 e\)
 
-we only look at beta2 for this one, right? or we do we look at beta4 also?
+The 95% CI for amount in which intercept is higher for public institutions is between -324.813 and 2694.853.
 
 ## Exercise 6
 
-Describe differences in early career pay...
+A college's institutional characteristics shed light on differences in early career pay of their attendees. In an analysis that considered out of state total, type of school (public or private), percentage of stem students, and the interaction between type of school and percent of stem students, low p-values and confidence intervals that do not incorporate 0 appear to provide evidence that percent of stem students and out of state total have a positive effect on the early career pay of school attendee. The other terms analyzed do not seem to be significant. To delve into the noted positive effects, we can say that we expect the early career pay of attendees to increase by 25 cents for each additional out of state student enrolled, holding all other variables constants, and we expect the early career pay of attendees to increase by 214 for each additional percent of stem students enrolled. To truly make the aforementioned inference on the basis of linear least squares, we need to ensure we satisfy conditions of linearity, normality, equal variance, and independence.
