@@ -1,0 +1,216 @@
+---
+title: "Homework 1"
+author: "Sonya Eason"
+format: pdf
+editor: visual
+---
+
+## Exercise 1
+
+a)  The response variable is the number of cricket chirps. The predictor variable is the temperature.
+
+b)  
+
+$$
+y_i = \beta_0 \ +\ \beta_1 * x_i \ +\ \epsilon_i 
+$$
+
+where $y_i$ is an observed number of chirps and $x_i$ is the temperature at the minute when that number of chirps were observed.
+
+c)  
+
+To conduct LLSR, we need to satisfy LINE assumptions. Specifically these are the follow assumptions in this context.
+
+1.  The mean number of cricket chirps per minute is linearly related bto temperature.
+
+2.  Observations are independent. Specifically, the number of cricket chirps is not correlated with previous number of cricket chirps of future number of cricket chirps.
+
+3.  The number of cricket chirps follow a normal distribution at each temperature.
+
+4.  The variance in number of cricket chirps is equal for all temperatures.
+
+## Exercise 2
+
+a\)
+
+The response variable is the depression score. The predictor variable is whether the patient was assigned to use an estrogen patch or not.
+
+b\)
+
+CHECK IN OFFICE HOURS
+
+The constant variance assumption is likely violated since we expect there could be more variation in postnatal depression of those who do not use the estrogen patch versus those who do use it.
+
+The linearity condition is not necessarily satisfied either since ....
+
+The normality assumption is also likely to be violated since....
+
+## Exercise 3
+
+a\) We have to make a statement that accounts for holding year constant because our estimate $\hat\beta_2$ will only speak only to the individual effect of Fast, which means if Yearnew shifts, there will be an additional effect unaccounted for.
+
+Let's look at the winning speeds when only the fast variable changes in comparison to winning speeds when both variables change to show this.
+
+$$
+\hat{y_1}
+= \hat\beta_0 + \hat\beta_1*Yearnew_1+ \hat\beta_2 * Fast_1
+$$
+
+$$
+\hat{y_2}
+= \hat\beta_0 + \hat\beta_1*Yearnew_2+ \hat\beta_2 * Fast_2
+$$
+
+When only the fast variable changes, which would mean $Yearnew1 = Yearnew2$, the estimated difference in winning speeds is simply $\hat\beta_2$ since Fast is an indicator variable.
+
+That being said, the same can not be said about when we do not hold Yearnew constant.
+
+Here we would also have to add the $\hat\beta_1 * (Yearnew_2 - Yearnew_1)$ to the $\hat\beta_2$ to find the difference in winning speed estimate between a fast and non-fast car without the year held constant.
+
+As shown, in a multivariate setting, we need to hold the other variables constant to interpret the effects of a single coefficient.
+
+b\) There's no error term in Eq 1.4 because we are looking at the estimated winning speed. The estimated winning speed is like looking at the expected value and because it's an estimate, we do not need to account for error. Error is needed to account for the difference between the deterministic components and the truth. Since $\hat{y}$ is not the truth, but instead the estimated response, we do not need to account for the randomness that lies within the error terms.
+
+## Exercise 4
+
+```{r}
+library(tidyverse)
+library(ggplot2)
+library(knitr)
+library(broom)
+```
+
+```{r}
+houses <- read_csv("kingCountyHouses.csv")
+```
+
+a\)
+
+```{r}
+lm(price ~ sqft, houses)
+```
+
+For each 100 square foot increase, houses prices in King County, Washington are expected to increase by \$28,060 dollars.
+
+```{r}
+lm(log(price)~sqft, houses)
+```
+
+When square foot increases by 100, log price is expected to increase by \$3.097\*10\^-2\$
+
+c\)
+
+$$
+log(\hat{y_2}) - log(\hat{y_1}) = \hat{\beta_0} + \hat{\beta_1} * sqft_2 - (\hat{\beta_0} + \hat{\beta_1} * sqft_1)
+$$
+
+$$
+log(\frac{\hat{y_2}}{\hat{y_1}}) = \hat{\beta_1}*(sqft_2 - sqft_1)
+$$
+
+$$
+\frac{\hat{y_2}}{\hat{y_1}} = e^{\hat{\beta_1}*(sqft_2 - sqft_1)}
+$$
+
+sqft increases by 100
+
+$$\frac{\hat{y_2}}{\hat{y_1}} = e^{\hat{\beta_1}*(100)}$$
+
+```{r}
+exp(3.987e-04*100)  
+```
+
+The price is expected to change by a multiplicative factor of 1.040675 when sqft increases by 100.
+
+d\)
+
+```{r}
+lm(price ~ log(sqft), houses)
+```
+
+$\hat{y_2} = \hat{\beta_0} + \hat{\beta_1}*{log(sqft_2)}$
+
+$$
+\hat{y_1} = \hat{\beta_0} + \hat{\beta_1} * log(sqft1)
+$$
+
+$$
+\hat{y_2} - \hat{y_1} = \hat{\beta_0} + \hat{\beta_1} * log(sqft2) - (\hat{\beta_0} + \hat{\beta_1} * log(sqft1))
+$$
+
+$$
+\hat{y_2} - \hat{y_1} = \hat{\beta_1} * log(\frac{sqft_2}{sqft_1})
+$$
+
+square foot increases by 10%
+
+$$\hat{y_2} - \hat{y_1} = \hat{\beta_1} * log(\frac{1.1*sqft_1}{sqft_1})$$
+
+$$\hat{y_2} - \hat{y_1} = \hat{\beta_1} * log(1.1)$$
+
+```{r}
+528647 * log(1.1)
+```
+
+The price is expected to increase by \$50,385.44 when sqft increases by 10%.
+
+## Exercise 5
+
+```{r}
+college <- read_csv("college-data.csv")
+```
+
+a\)
+
+```{r}
+ggplot(college, aes(early_career_pay))+
+  geom_histogram()
+```
+
+The plot appears to follow a bell curve shape like in a normal distribution. The most frequent early_career_pay values are slightly below 50k.
+
+b\)
+
+```{r}
+ggplot(college, aes(type, early_career_pay)) +
+geom_boxplot()
+```
+
+It preliminarily appears that the private schools have a slightly higher early_career pay.
+
+```{r}
+ggplot(college, aes(stem_percent, early_career_pay)) +
+geom_point()
+```
+
+As a school's stem_percent increase, it seems their early_career pay value increases.
+
+c\)
+
+```{r}
+lm(early_career_pay ~ out_of_state_total + type + stem_percent + type * stem_percent, college) |>
+  tidy(conf.int = TRUE) |>
+  kable(digits = 3)
+```
+
+d\)
+
+n - p - 1 degrees of freedom
+
+```{r}
+n = nrow(college)
+#non-intercept terms
+p = 4
+
+dof = n - p - 1
+```
+
+There are `{r} dof` degrees of freedom in the estimate of the regression standard error $\sigma$.
+
+e\)
+
+we only look at beta2 for this one, right? or we do we look at beta4 also?
+
+## Exercise 6
+
+Describe differences in early career pay...
