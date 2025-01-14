@@ -205,6 +205,8 @@ dof = n - p - 1
 
 There are `{r} dof` degrees of freedom in the estimate of the regression standard error $\sigma$.
 
+
+`{r} nrow(colleges)`
 e\)
 
 The 95% CI for amount in which intercept is higher for public institutions is between -324.813 and 2694.853.
