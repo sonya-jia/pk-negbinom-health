@@ -54,7 +54,6 @@ A Bernoulli distribution might be useful to model if a newborn has a low birthwe
 
 ## Exercise 8
 
-Poisson instead of binomial..../.../.../.../
 
 A poisson distribution would be useful in modeling number of matings. Mating is an event that can occur or not occur, and these events likely occur at a constant rate. Since each event consists of number of matings, we need to quantify this by a distribution that has support over [0, 1, 2, 3, ...], so Poisson is suitable. We expect there to be an average number of successful matings for older elephants and an average number of successful matings for younger elephants which we could utilize to evaluate our quesiton. The only other potential distribution is binomial which would not work since we do not have information about number of trials or number of attempted matings. 
 
