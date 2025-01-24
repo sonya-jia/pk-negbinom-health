@@ -19,7 +19,8 @@ p <- seq(0, 1, by = 0.001)
 var <- p*(1-p)
 plot(p, var, type = "l")
 
-#referenced chat gpt to determine how to fix my specification of the plot function here, asked this prompt "how to plot a line in R"
+#referenced chat gpt to determine how to fix my specification of the plot 
+#function here, asked this prompt "how to plot a line in R"
 ```
 
 ## Exercise 2
@@ -29,10 +30,12 @@ Hypergeometric and binomial random variables are similar in that they are counti
 
 ## Exercise 3
 
-A poisson random variable counts independent events that happen at a constant average rate. The exponential distribution can represent hte time between events in such a Poisson process.
+A poisson random variable counts independent events that happen at a constant average rate. The exponential distribution can represent the time between events in such a Poisson process.
 
-## Exercise 4
-While an exponential random variable will represent the time between events or before an event, a gamma random variable will represent the time for a certain number of events ot occur. Therefore, a gamma random variable will essentially be a sum of exponential random variables. 
+## Exercise 4 
+
+While geometric looks at the number of failures before the first success, an exponential random variable will represent the time between events or before an event. From this it becomes clear that an exponential random variable is continuous and a geometric random variable is discrete. 
+
 
 ## Exercise 5
 
@@ -50,7 +53,10 @@ A Bernoulli distribution might be useful to model if a newborn has a low birthwe
 
 
 ## Exercise 8
-A binomial distribution would be useful in modeling number of matings. Mating as an event can either occur or not occur, representing success or not success. Since each event consists of number of matings, we need to quantify this by a distribution that has support over [0, 1, 2, 3, ...], so binomial is suitable. We expect there to be a probability of success or probability of mating success for older elephants and probability of mating success for younger elephants with our probability parameter potentially differing across elephant ages. 
+
+Poisson instead of binomial..../.../.../.../
+
+A poisson distribution would be useful in modeling number of matings. Mating is an event that can occur or not occur, and these events likely occur at a constant rate. Since each event consists of number of matings, we need to quantify this by a distribution that has support over [0, 1, 2, 3, ...], so Poisson is suitable. We expect there to be an average number of successful matings for older elephants and an average number of successful matings for younger elephants which we could utilize to evaluate our quesiton. The only other potential distribution is binomial which would not work since we do not have information about number of trials or number of attempted matings. 
 
 
 ## Exercise 9
@@ -70,7 +76,7 @@ p <- rbeta(1000, 4, 1)
 y <- rbinom(1000, 10, p)
 hist(y)
 ```
-Although they both are assymetric, the original binomial appears to be more symmetric, and  the beta-binomial distribution has a strong left skew. This leads me to believe the standard deviation is not a reliable metric of variability for beta-binomial. In the beta-binomial plot, lower values like 1 and 2 appeared to show up, while they could not be seen in the plain binomial distribution.  While the means of both the plain binomial and the beta-binomail are very similar, it seems like the standard deviation is larger for the beta-binomial distribution.
+Although they both are assymetric, the original binomial appears to be more symmetric, and  the beta-binomial distribution has a strong left skew. This leads me to believe the standard deviation is not a reliable metric of variability for beta-binomial. In the beta-binomial plot, lower values like 1 and 2 appeared to show up, which were not seen in the plain binomial distribution. The possible values, however, should be the same: 0 to 10. While the means of both the plain binomial and the beta-binomail are very similar, it seems like the standard deviation is larger for the beta-binomial distribution.
 
 ```{r}
 mean(observed)
