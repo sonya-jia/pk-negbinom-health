@@ -6,15 +6,32 @@ editor: visual
 ---
 
 ```{r}
+if (!require(pacman)) install.packages("pacman")
+pacman::p_load(ggplot2, tidyverse)
+```
+
+```{r echo=FALSE}
 library(ggplot2)
 library(tidyverse)
 ```
 
 ### Exercise 1
 
+We define the probability mass function of $X_i$, a poisson random variable as $$
+P(X_i=x_i) = \frac{\lambda^{x_i}e^{-\lambda}}{x_i!}
+$$ We will determine the likelihood by considering the product of the the poisson PMF in order to account for all observations which occur for i = 1, ..., n.
+
+This is done under the assumption that each occurrence of $X_i$ is iid.
+
+$$
+X_i \stackrel{\text{i.i.d.}}{\sim} Poisson(\lambda)
+$$
+
 $$
 L(\lambda) = \prod_{i=1}^{n} \frac{\lambda^{x_i}e^{-\lambda}}{x_i!}
 $$
+
+This can be simplified to below.
 
 $$
 L(\lambda) = \frac{\lambda^{\sum_{i=1}^{n} x_i} e^{-n\lambda}}{\prod_{i=1}^{n} x_i!}
@@ -22,11 +39,17 @@ $$
 
 ### Exercise 2
 
+In order to find the maximum likelihood estimate, we are able to find the $\lambda$ for which the log likelihood function is maximized.
+
+This works because log is a monotonic function.
+
 $$
 log(L(\lambda)) = log(\frac{\lambda^{\sum_{i=1}^{n} x_i} e^{-n\lambda}}{\prod_{i=1}^{n} x_i!})
 $$ $$
 log(L(\lambda)) = \sum_{i=1}^{n}x_i \ log(\lambda) -n\lambda - log(\prod_{i=1}^nx_i!)
-$$ $$
+$$
+
+$$
 \frac{\partial }{\partial \lambda} log(L(\lambda))= \frac{\sum_{i=1}^nx_i}{\lambda} - n
 $$
 
@@ -78,29 +101,29 @@ df |>
 
 ### Exercise 4
 
-| Game | First Five Shots | Likelihood (No Hot Hand) | Likelihood (Hot Hand)              |
-|------------------|------------------|------------------|------------------|
-| 1    | BMMBB            | $(p_b)^3(1-p_b)^2$       | $$p_b(p_{b|b})(1-p_{b|b})(1-p_b)$$ |
-| 2    | MBMBM            | $$                       
-                           (p_b)^2(1-p_b)^3          
-                           $$                        | $$                                 
-                                                      (1-p_b)(p_b)^2(1-p_{b|b})^2         
-                                                      $$                                  |
-| 3    | MMBBB            | $$                       
-                           p_b^3(1-p_b)^2            
-                           $$                        | $$                                 
-                                                      (1-p_b)^2(p_b)(p_{b|b})^2           
-                                                      $$                                  |
-| 4    | BMMMB            | $$                       
-                           p_b^2(1-p_b)^3            
-                           $$                        | $$                                 
-                                                      p_b^2(1-p_{b|b})(1-p_{b})^2         
-                                                      $$                                  |
-| 5    | MMMMM            | $$                       
-                           (1-p_b)^5                 
-                           $$                        | $$                                 
-                                                      (1-p_b)^5                           
-                                                      $$                                  |
+| Game | First Five Shots | Likelihood (No Hot Hand)                              | Likelihood (Hot Hand)                                                                      |
+|------|------------------|-------------------------------------------------------|--------------------------------------------------------------------------------------------|
+| 1    | BMMBB            | $(p_b)^3(1-p_b)^2$                                    | $$p_b(p_{b|b})(1-p_{b|b})(1-p_b)$$                                                         |
+| 2    | MBMBM            | $$                                                    
+                                                      (p_b)^2(1-p_b)^3            
+                                                      $$                          | $$                                                                                         
+                                                                                                                                         (1-p_b)(p_b)^2(1-p_{b|b})^2           
+                                                                                                                                         $$                                    |
+| 3    | MMBBB            | $$                                                    
+                                                      p_b^3(1-p_b)^2              
+                                                      $$                          | $$                                                                                         
+                                                                                                                                         (1-p_b)^2(p_b)(p_{b|b})^2             
+                                                                                                                                         $$                                    |
+| 4    | BMMMB            | $$                                                    
+                                                      p_b^2(1-p_b)^3              
+                                                      $$                          | $$                                                                                         
+                                                                                                                                         p_b^2(1-p_{b|b})(1-p_{b})^2           
+                                                                                                                                         $$                                    |
+| 5    | MMMMM            | $$                                                    
+                                                      (1-p_b)^5                   
+                                                      $$                          | $$                                                                                         
+                                                                                                                                         (1-p_b)^5                             
+                                                                                                                                         $$                                    |
 
 b\)
 
@@ -116,11 +139,9 @@ $$
 log(Lik(p_b))) = 10log(p_b)+15log(1-p_b)
 $$
 
-
 $$
 \frac{\partial}{\partial p_b} log (Lik(p_b)) = \frac{10}{p_b} - \frac{15}{1-p_b} = 0
 $$
-
 
 $$
 \frac{10}{p_b} = \frac{15}{1-p_b}
@@ -130,12 +151,9 @@ $$
 \hat{p_b}_{MLE} = 2/5
 $$
 
-
 $$
 \frac{\partial^2}{\partial p_b^2} log(Lik(p_b)) = \frac{-10}{p_b^2}-\frac{15}{(1-p_b)^2} < 0 
-$$
-so we know our $\hat{p_b}$ value is a maximum. 
-
+$$ so we know our $\hat{p_b}$ value is a maximum.
 
 Model 2: Hot Hand Model
 
@@ -145,21 +163,17 @@ $$
 
 $$
 log \ Lik(p_b, p_{b|b}) = 7*log(p_b)+11log(1-p_b)+3log(p_{b|b})+4log(1-p_{b|b})
-$$
-$$
+$$ $$
 \frac{\partial}{\partial p_{b}} log(Lik(p_b, p_{b|b})) = \frac{7}{p_b} - \frac{11}{1-p_b} = 0
-$$
-$$
+$$ $$
 \frac{7}{p_b} = \frac{11}{1-p_b}
 $$
 
 $$
 \hat{p_b}_{MLE} = \frac{7}{18}
-$$
-$$
+$$ $$
 \frac{\partial^2}{\partial p_b^2} = \frac{-7}{p_b^2}-\frac{11}{(1-p_b)^2} <0 
-$$
-so our $\hat{p_b}$ is a maximum. 
+$$ so our $\hat{p_b}$ is a maximum.
 
 $$
 \frac{\partial}{\partial p_{b|b}} log(Lik(p_b, p_{b|b})) = \frac{3}{p_{b|b}} - \frac{4}{1-p_{b|b}}
@@ -175,8 +189,7 @@ $$
 
 $$
 \frac{\partial^2}{\partial p_{b|b}^2} = \frac{-3}{p_{b|b}} - \frac{4}{(1-p_{b|b})^2} <0
-$$
-so this $\hat{p_{b|b}}$ is a maximum. 
+$$ so this $\hat{p_{b|b}}$ is a maximum.
 
 ```{r}
 logLik1<- function(pb){
@@ -204,4 +217,4 @@ LRT <- 2 *(logLik2(mle1, mle2)-logLik1(mle))
 pchisq(LRT, 1, lower.tail = FALSE)
 ```
 
-The chi-squared test p value is large so we fail to reject evidence that the not hot hand is not sufficient. For this reason, we choose the first model without the additional parameter. 
+The chi-squared test p value is large so we fail to reject evidence that the not hot hand is not sufficient. For this reason, we choose the first model without the additional parameter.
