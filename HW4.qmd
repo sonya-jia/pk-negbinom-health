@@ -1,0 +1,108 @@
+---
+title: "Homework 4"
+author: "Sonya Eason"
+format: pdf
+editor: visual
+---
+```{r}
+if (!require(pacman)) install.packages("pacman")
+pacman::p_load(knitr, broom, tidyverse)
+```
+
+
+```{r}
+library(tidyverse)
+library(knitr)
+library(broom)
+```
+```{r}
+crab <- read_csv("data/crab.csv")
+
+ambiguity <- read_csv("data/ambiguity.csv")
+```
+
+
+
+
+## Exercise 1
+
+a) The response is the mean value of fisher caught per week by each visitor. 
+
+b) The possible values are 0, 1, 2, 3, up to the maximum number fish there are in the state wildlife park. 
+
+c) Lambda represents the mean number of fish caught per wekk. 
+
+d) A zero-inflated model could be considered here since there are likely a lot of zeroes representing people who caught zero fish during their stay. These zeroes can be separated into two subgroups the people who never fish, i.e. the true zeroes., and those who just didn't fish on their trips this time.
+
+## Exercise 2
+
+a)
+```{r}
+crab <- crab |>
+  mutate(
+    Color = factor(Color),
+    Spine = factor(Spine)
+  )
+```
+
+```{r}
+ggplot(crab, aes(x = Satellite)) +
+  geom_histogram()
+```
+Is there preliminary evidence the number of satellites could be modeled
+as a Poisson response? Briefly explain
+
+In a Poisson response, we do expe...
+
+b)
+```{r}
+sat_model <- glm(Satellite ~ Width + Weight + Spine, family = poisson, data = crab)
+
+
+sat_model |>
+  tidy(conf.int = T) |>
+  kable(digits = 3)
+```
+
+
+c) When a female crab has one worn or broken spine, the number of satellites is expected to change by a multiplicative factor of `{r} exp(-0.214)`compared to when the female crab has two spines that are both in good condition, holding all else constant. When a female crab has two worn or broken spines, the number of satellites is expected to change by a multiplicative factor of `{r} exp(-0.049)`compared to when the female crab has two spines that are both in good condition, holding all else constant. 
+
+
+## Exercise 3
+
+```{r}
+crab |>
+  group_by(Spine) |>
+  summarize(mean = mean(Satellite),
+            var = var(Satellite))
+```
+
+A quasi-Poisson regression is suitable because there is evidence of overdispersion seen by variances that are larger than means at each level. In a typical Poisson model, we'd expect mean = variance, so we'd use quasi-Poison to account for the fact that that does not hold here.  
+
+b)
+
+```{r}
+sat_model_2 <- glm(Satellite ~ Width + Weight + Spine, family = quasipoisson, data = crab)
+
+sat_model_2 |>
+tidy(conf.int = TRUE) |>
+  kable(digits = 3)
+
+```
+c)
+
+```{r}
+se <- tidy(sat_model)$std.error
+
+se_overdis <- tidy(sat_model_2)$std.error
+
+dispersion_param <- (se_overdis/se)^2
+
+dispersion_param
+```
+The estimated dispersion parameter is 3.169448. 
+
+
+d) The estimated coefficients do not change at all between this model and the previous one while the standard errors increase by a multiplicative factor of `{r} exp(3.169448)`
+
+## Exercise 4
