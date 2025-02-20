@@ -178,9 +178,7 @@ This can be shown by deriving the marginal density of Y.
 
 
 $$
-
 f_Y = \int f_{Y,\lambda} \, d\lambda
-
 $$
 
 $$
@@ -227,34 +225,34 @@ ggplot(ambiguity, aes(x = totalIssuePages)) +
 We might consider using a hurdle model because the number of zeroes is very large, more so than we would expect in a Poisson model. A zero-inflated model is not appropriate because ZIP assumes that the zeroes are comprised of two different groups-- the true always zeoroes and the zeroes on occasion. Here, the context of our observations doesn't indicate that this sort of analysis would make senes. We are counting number of issues candidates commented on, so there are not really two groups of zeroes since the study involves every statement a candidate made, not just on a single occasion.
 
 b)
-```{r}
-amb <- ambiguity |>
-  mutate(at_least_one = ifelse(totalIssuePages > 0, 1, 0)) |>
-  filter(!is.na(totalIssuePages))
 
-
-```
 ```{r}
-amb |>
-  group_by(democrat) |>
-  summarize(log_odds = log(mean(at_least_one)/(1-mean(at_least_one))))
+ambiguity <- ambiguity |>
+  mutate(
+    atLeastOne = if_else(totalIssuePages >=1, 1, 0))
 ```
 
 
-```{r}
-amb_two <- ambiguity |>
-  mutate(at_least_one = ifelse(totalIssuePages > 0, 1, 0)) |>
-  filter(!is.na(totalIssuePages))
 
-amb_two |>
-  group_by(ideology) |>
-  summarize(log_odds = log(mean(at_least_one)/(1-mean(at_least_one))))
+```{r}
+df_binned <- ambiguity %>%
+  mutate(bin = cut(ideology, breaks = 10)) %>%
+  group_by(bin) %>%
+  summarize(mean_ideology = mean(ideology), p_hat = mean(atLeastOne), .groups = "drop") %>%
+  mutate(log_odds = log(p_hat / (1 - p_hat)))
+
+# Plot
+ggplot(df_binned, aes(x = mean_ideology, y = log_odds)) +
+  geom_point() +
+  geom_line() +
+  labs(title = "Empirical Log Odds Plot", x = "Ideology (grouped)", y = "Log Odds") +
+  theme_minimal()
 ```
 
-IDK
-https://chatgpt.com/c/67b0fa80-9000-8011-94cd-a67009bb262c
+https://chatgpt.com/c/67b67f41-86b4-8011-89ad-ff17749876d0 
 
-need help with visualization
+Used chatgpt to get started on figuring out this empirical logit plot.
+
 
 c)
 ```{r}
@@ -264,7 +262,8 @@ library(pscl)
 ```
 
 ```{r}
-hurdle(totalIssuePages ~ ideology + democrat, dist = "poisson", data = ambiguity) 
+hurdle(totalIssuePages ~ ideology + democrat, 
+       dist = "poisson", data = ambiguity) 
 ```
 Interpret ideology - 
 
@@ -275,7 +274,8 @@ The odds that a candidate spoke on zero issues changes by a multiplicative facto
 
 d)
 ```{r}
-hurdle(totalIssuePages ~ ideology + democrat + ideology*democrat, dist = "poisson", data = ambiguity)
+hurdle(totalIssuePages ~ ideology + democrat + ideology*democrat, 
+       dist = "poisson", data = ambiguity)
 ```
 
 For democrat candidates that commented on at least one issue, the mean number of issues a candidate spoke on is expected to change by a multiplicative factor of `{r} exp(-0.07592+0.03387)` for each unit increase in ideology. 
