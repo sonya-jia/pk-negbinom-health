@@ -18,6 +18,10 @@ Poisson regression assumes
 
 The response is the patients' number of relapses within five years of initial treatment.
 
+\$\$
+
+\$\$
+
 *Exercise 3*
 
 Possible values are 0, 1, 2, all the way up to infinity but contextually, this means the max number of relapses.
