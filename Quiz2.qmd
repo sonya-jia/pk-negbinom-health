@@ -10,7 +10,7 @@ editor: visual
 Poisson regression assumes
 
 1.  independence of events observed
-2.  \$log \lambda\$ is a linear function of X
+2.  log $\lambda$ is a linear function of X
 3.  mean is equal to variance for each level of predictors
 4.  response is a count of occurrences within a space or time
 
@@ -18,13 +18,9 @@ Poisson regression assumes
 
 The response is the patients' number of relapses within five years of initial treatment.
 
-\$\$
-
-\$\$
-
 *Exercise 3*
 
-Possible values are 0, 1, 2, all the way up to infinity but contextually, this means the max number of relapses.
+Possible values are 0, 1, 2, all the way up to infinity but contextually, this goes up to the max number of relapses.
 
 *Exercise 4*
 
@@ -58,11 +54,11 @@ We can assess linearity by plotting log of empirical mean of credit card use aga
 
 *Exercise 10*
 
-To assess the equal mean and variance assumption, we could look at both the overall mean and variance in credit card use and the means and variances in credit card use by levels of income. For example, it may be useful to look at each 10k group of income and get the mean and variance in credit card use. From the corresponding calculating means and variances calculating, we can determine whether the means and variances are close enough to be considered equal and see whether this mean = variance condition is satisfied.
+To assess the equal mean and variance assumption, we could look at both the overall mean and variance in credit card use and the means and variances in credit card use by levels of income. For example, it may be useful to look at each 10k group of income and get the mean and variance in credit card use. Then, we can determine whether the means and variances are close enough to be considered equal and see whether this mean = variance condition is satisfied.
 
 *Exercise 11*
 
-The response is number of dates arranged online. The predictor was age. The offset was time online. This offset does make sense because we'd expect number of dates arranged online to vary by time spent online, so adjusting for this will allow us focus on how the predictor of age relates to number of dates arranged online.
+The response is number of dates arranged online. The predictor was age. The offset was time online. This offset does make sense because we'd expect number of dates arranged online to vary by time spent online, so adjusting for this will allow us focus on how the predictor of age relates to number of dates arranged online since otherwise. The offset also allows us to interpret coefficients in terms of the effect they have on mean dates arranged online per hour online (i.e. the mean rate).
 
 *Exercise 12*
 

@@ -26,13 +26,13 @@ ambiguity <- read_csv("data/ambiguity.csv")
 
 ## Exercise 1
 
-a) The response is the mean value of fisher caught per week by each visitor. 
+a) The response is the number of fishes caught by each visitor visitor in their one week stay. We sare specifically looking at hte mean number. 
 
 b) The possible values are 0, 1, 2, 3, up to the maximum number fish there are in the state wildlife park. 
 
-c) Lambda represents the mean number of fish caught per wekk. 
+c) Lambda represents the mean number of fish caught per week, which is 21.5. 
 
-d) A zero-inflated model could be considered here since there are likely a lot of zeroes representing people who caught zero fish during their stay. These zeroes can be separated into two subgroups the people who never fish, i.e. the true zeroes., and those who just didn't fish on their trips this time.
+d) A zero-inflated model could be considered here since there are likely a lot of zeroes representing people who caught zero fish during their stay, and there are also two subgroups of zeroes. These zeroes can be separated into two subgroups the people who never fish, i.e. the true zeroes., and those who just didn't catch fish on their trips this time.
 
 ## Exercise 2
 
@@ -54,6 +54,8 @@ as a Poisson response? Briefly explain
 
 In a Poisson response, we do expe...
 
+right-skewed, bounded on left, unbounded, count, poisson
+
 b)
 ```{r}
 sat_model <- glm(Satellite ~ Width + Weight + Spine, family = poisson, data = crab)
@@ -65,7 +67,7 @@ sat_model |>
 ```
 
 
-c) When a female crab has one worn or broken spine, the number of satellites is expected to change by a multiplicative factor of `{r} exp(-0.214)`compared to when the female crab has two spines that are both in good condition, holding all else constant. When a female crab has two worn or broken spines, the number of satellites is expected to change by a multiplicative factor of `{r} exp(-0.049)`compared to when the female crab has two spines that are both in good condition, holding all else constant. 
+c) When a female crab has one worn or broken spine, the number of satellites is expected to change by a multiplicative factor of `{r} exp(-0.214)` compared to when the female crab has two spines that are both in good condition, holding all else constant. When a female crab has two worn or broken spines, the number of satellites is expected to change by a multiplicative factor of `{r} exp(-0.049)` compared to when the female crab has two spines that are both in good condition, holding all else constant. 
 
 
 ## Exercise 3
@@ -137,7 +139,7 @@ b)
 In class, we showed that if we have 
 
 $$
-\lambda \sim gamma(r, \frac{p}{1-p})
+\lambda \sim Gamma(r, \frac{p}{1-p})
 $$
 $$
 Y|\lambda \sim Poisson(\lambda)
@@ -167,7 +169,7 @@ mean(negbn_samples)
 var(negbn_samples)
 ```
 
-The histogram for the NegBinom(3, 2/3) appears very similar to our Poisson-Gamma distribution. The mean and variance values are also very similar.
+The histogram for the NegBinom(3, 2/3) appears very similar to our Poisson-Gamma distribution. The mean and variance va lues are also very similar.
 
 
 c)
@@ -222,7 +224,7 @@ ggplot(ambiguity, aes(x = totalIssuePages)) +
   geom_histogram(binwidth = 1)
 ```
 
-We might consider using a hurdle model because the number of zeroes is very large, more so than we would expect in a Poisson model. A zero-inflated model is not appropriate because ZIP assumes that the zeroes are comprised of two different groups-- the true always zeoroes and the zeroes on occasion. Here, the context of our observations doesn't indicate that this sort of analysis would make senes. We are counting number of issues candidates commented on, so there are not really two groups of zeroes since the study involves every statement a candidate made, not just on a single occasion.
+We might consider using a hurdle model because the number of zeroes is very large, more so than we would expect in a Poisson model. A zero-inflated model is not appropriate because ZIP assumes that the zeroes are comprised of two different groups-- the true always zeoroes and the zeroes on occasion. Here, the context of our observations doesn't indicate that this sort of analysis would make sense. We are counting number of issues candidates commented on, so there are not really two groups of zeroes since the study involves every statement a candidate made, not just on a single occasion.
 
 b)
 
@@ -238,7 +240,8 @@ ambiguity <- ambiguity |>
 df_binned <- ambiguity %>%
   mutate(bin = cut(ideology, breaks = 10)) %>%
   group_by(bin) %>%
-  summarize(mean_ideology = mean(ideology), p_hat = mean(atLeastOne), .groups = "drop") %>%
+  summarize(mean_ideology = mean(ideology), p_hat = mean(atLeastOne), 
+            .groups = "drop") %>%
   mutate(log_odds = log(p_hat / (1 - p_hat)))
 
 # Plot
