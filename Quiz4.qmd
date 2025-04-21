@@ -1,0 +1,190 @@
+---
+title: "Quiz 4"
+format: 
+  pdf:
+    fig-height: 4
+    fig-width: 6
+---
+
+```{r message=FALSE}
+
+library(sf)
+library(tidyverse)
+library(MASS)
+library(broom)
+```
+
+
+
+```{r message = FALSE}
+localities <- read_csv("data/Pakistan Districts Profile.csv")
+```
+
+```{r message = FALSE, warning = FALSE}
+localities <- localities |>
+  mutate(doctors = `Number of Doctors`,
+         poverty = as.numeric(`Multi Dimensional Poverty Index`),
+         labor = `Labour force`,
+         name = `name`,
+         province = Province)
+
+
+localities <- dplyr::select(localities, doctors, poverty, 
+                            labor, name, province)
+
+
+```
+
+
+
+
+
+::: {.callout-note title="Introduction to the Data."}
+
+Your task is to model the number of doctors in Pakistan based on poverty levels.
+
+- **localities:** Information about different geographic districts, i.e. cities, of Pakistan. This was taken from Kaggle (1), which extracted the data from Open Data Pakistan (2).
+  - *doctors*, the number of doctors in a district. Our response variable.
+  - *labor*, the size of the labor force.
+  - *poverty*, a poverty index
+  - *province*, a larger geographic region. Just like each state has multiple cities in the US, each province has multiple districts in Pakistan. This will be useful in visualizing how numbers vary across provinces.
+  
+:::
+
+
+**Question 1: Make a visualization highlighting number of doctors in each of Pakistan's 7 provinces. What do you notice? Optional: Feel free to find geographic identification data online, if you're interested n creating a map visual.**
+
+Students can simply do a bar plot with number of doctors versus province as shown below:
+
+```{r warning=FALSE}
+ggplot(localities, aes(x = province, y = doctors, fill = province)) +
+  geom_col(show.legend = FALSE) +
+  labs(
+    title = "Number of Doctors by Province",
+    x = "Province",
+    y = "Number of Doctors"
+  ) +
+  theme_minimal() +
+  theme(
+    plot.title = element_text(face = "bold", size = 14, hjust = 0.5),
+    axis.text.x = element_text(angle = 45, hjust = 1)
+  )
+```
+
+
+Alternatively, here's another visualization students can make:
+
+```{r warning=FALSE}
+
+pakistan <- st_read("data/geoBoundaries-PAK-ADM1.shp", quiet = TRUE)
+
+
+```
+```{r}
+provinces <- localities |>
+  group_by(province) |>
+  summarise(
+    doctors = sum(doctors)
+  )
+
+provinces <- provinces |>
+  mutate(province = recode(province,
+                           "KPK" = "Khyber Pakhtunkhwa",
+                           "AJK" = "Azad Kashmir"))
+```
+
+
+```{r}
+pak <- left_join(pakistan, provinces, by = c("shapeName" = "province"))
+```
+
+
+```{r}
+ggplot(pak) +
+  geom_sf(aes(fill = doctors)) +
+  theme_minimal()
+```
+
+Things to notice: 
+
+  - Missing data: We don't have information for number of doctors in a couple of provinces. 
+
+  - Number of Doctors: There are the highest number of doctors in KPK and Sindh. 
+
+
+\newpage
+**Question 2: What kind of model may be well suited for the task? Why?**
+
+Poisson is a good option when looking for counts because it will be defined on non-negative integers, among other reasons. 
+
+
+::: {.callout-note title="Additional Instructions."}
+Before proceeding, we will remove observations where data is missing for doctors, labor, and poverty. This involves assuming that the observations are missing at random, but this criteria may not hold. For the sake of this analysis, we will proceed like this. Please incorporate the below code chunk into your code. 
+:::
+
+
+```{r}
+localities <- localities |>
+  filter(!is.na(doctors)) |>
+  filter(!is.na(labor)) |>
+  filter(!is.na(poverty))
+```
+
+\newpage
+**Question 3: Is there evidence of overdispersion? Check for it and if there is, suggest how we might correct for it. **
+
+```{r}
+mean(localities$doctors)
+var(localities$doctors)
+```
+There is evidence of overdispersion since the empirical variance exceeds the mean. 
+
+To correct for this, it may be useful to either utilize negative binomial regression or inflate the standard errors. 
+
+
+
+
+
+\newpage
+
+**Question 4: Could an offset be useful in our goal to analyze covariates related to number of doctors?**
+
+An offset is useful because more populous areas naturally have more doctors; thus, we use labor force size as the offset.
+
+\newpage
+**Question 5: Depending on your answer for question 2, fit a model using either the regular Poisson (without inflating standard errors) or the negative binomial. Make a choice to include an offset depending on question 4. Your model should incorporate the covariate poverty. If you do include an offset, remember that log(0) is undefined and this may mean some data filtering is needed beforehand.**
+
+
+
+```{r}
+loca_new <- localities |>
+  filter(labor != 0)
+```
+
+```{r warning=FALSE}
+model <- glm.nb(doctors ~ poverty + offset(log(labor)), data = loca_new)
+
+tidy(model, conf.int = TRUE)
+
+```
+
+\newpage
+
+**Question 6: Interpret the effect of poverty. **
+
+The p-value is low. For each increase in the poverty index by one unit, the expected rate of doctors per labor population in a district will change by a multiplicative factor of `{r} exp(-1.54)`. This means we expect the number of doctors to decrease by 78.6% for each point increase in poverty index. 
+
+There are no poverty index values with a one point difference since the poverty index appears to occur between 0 and 1. It may be more meaningful to make interpretations for each 0.1 point increase in the poverty index. For example, the expected rate of doctors per labor population in a district will change by a multiplicative factor of `{r} exp(-1.54*0.1)`. This means we expect the number of doctors to decrease by 14.3% for each 0.1 point increase in poverty index.
+
+```{r}
+min(loca_new$poverty)
+
+max(loca_new$poverty)
+```
+
+
+References
+
+(1) https://www.kaggle.com/datasets/alikhan83/pakistan-district-profile
+
+(2) https://opendata.com.pk/dataset/district-profiles-all-districts-of-pakistan 
