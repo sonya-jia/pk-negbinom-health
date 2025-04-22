@@ -12,6 +12,7 @@ library(sf)
 library(tidyverse)
 library(MASS)
 library(broom)
+library(grid)
 ```
 
 
@@ -50,6 +51,70 @@ Your task is to model the number of doctors in Pakistan based on poverty levels.
   - *province*, a larger geographic region. Just like each state has multiple cities in the US, each province has multiple districts in Pakistan. This will be useful in visualizing how numbers vary across provinces.
   
 :::
+
+```{r}
+
+
+library(grid)
+
+grid.newpage()
+
+# === Main title ===
+grid.text("Geographical Hierarchy", x = 0.5, y = 0.95, 
+          gp = gpar(fontsize = 16, fontface = "bold", col = "#333333"))
+
+# === Section Labels ===
+grid.text("United States", x = 0.25, y = 0.87, 
+          gp = gpar(fontsize = 13, fontface = "bold", col = "#555555"))
+grid.text("Pakistan", x = 0.75, y = 0.87, 
+          gp = gpar(fontsize = 13, fontface = "bold", col = "#555555"))
+
+# === First nested box (left side) ===
+
+# Outer box 1
+grid.roundrect(x = 0.25, y = 0.5, width = 0.4, height = 0.6, 
+               gp = gpar(col = "#444444", fill = "#F0F0F0", lwd = 2), 
+               r = unit(0.05, "snpc"))
+
+# Label for outer box 1
+grid.text("State", x = 0.25, y = 0.77, 
+          gp = gpar(fontsize = 12, fontface = "bold", col = "#444444"))
+
+# Inner box 1
+grid.roundrect(x = 0.25, y = 0.5, width = 0.25, height = 0.35, 
+               gp = gpar(col = "#4A90E2", fill = "#D6EAF8", lwd = 2), 
+               r = unit(0.05, "snpc"))
+
+# Label for inner box 1
+grid.text("City", x = 0.25, y = 0.5, 
+          gp = gpar(fontsize = 11, col = "#2C3E50"))
+
+# === Second nested box (right side) ===
+
+# Outer box 2
+grid.roundrect(x = 0.75, y = 0.5, width = 0.4, height = 0.6, 
+               gp = gpar(col = "#444444", fill = "#F0F0F0", lwd = 2), 
+               r = unit(0.05, "snpc"))
+
+# Label for outer box 2
+grid.text("Province", x = 0.75, y = 0.77, 
+          gp = gpar(fontsize = 12, fontface = "bold", col = "#444444"))
+
+# Inner box 2
+grid.roundrect(x = 0.75, y = 0.5, width = 0.25, height = 0.35, 
+               gp = gpar(col = "#27AE60", fill = "#D5F5E3", lwd = 2), 
+               r = unit(0.05, "snpc"))
+
+# Label for inner box 2
+grid.text("District", x = 0.75, y = 0.5, 
+          gp = gpar(fontsize = 11, col = "#1B4D3E"))
+
+
+```
+
+determined how to do grid nested boxes from this conversation: https://chatgpt.com/c/6807c215-16e8-8008-a4ee-e24c79226624 
+
+
 
 
 **Question 1: Make a visualization highlighting number of doctors in each of Pakistan's 7 provinces. What do you notice? Optional: Feel free to find geographic identification data online, if you're interested n creating a map visual.**
