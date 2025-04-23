@@ -6,35 +6,48 @@ format:
     fig-width: 6
 ---
 
-```{r message=FALSE}
+## Task
+::: {.callout-note title="Study Information."}
+
+The data was collected by the Sustainable Development Policy Institute (SDPI), which is a non-profit think tank in Pakistan. The data was made accessible on [Open Now Pakistan](https://opendata.com.pk/dataset/district-profiles-all-districts-of-pakistan). [This Kaggle dataset](https://www.kaggle.com/datasets/alikhan83/pakistan-district-profile) extracted the data from here, and merged all the data across districts so that each district was an observation in the file. 
+
+:::
+
+```{r message=FALSE, warning=FALSE}
 
 library(sf)
 library(tidyverse)
 library(MASS)
 library(broom)
 library(grid)
+library(ggrepel)
+library(knitr)
+library(glmmTMB)
+library(broom.mixed)
 ```
 
 
 
 ```{r message = FALSE}
-localities <- read_csv("data/Pakistan Districts Profile.csv")
+districts <- read_csv("data/Pakistan Districts Profile.csv")
 ```
 
 ```{r message = FALSE, warning = FALSE}
-localities <- localities |>
+districts <- districts |>
   mutate(doctors = `Number of Doctors`,
          poverty = as.numeric(`Multi Dimensional Poverty Index`),
-         labor = `Labour force`,
+         pop = `Population`,
          name = `name`,
-         province = Province)
+         province = Province,
+    public_hospitals = if_else(`Govt. Health Institutions` == 0, 0, 1))
 
 
-localities <- dplyr::select(localities, doctors, poverty, 
-                            labor, name, province)
+districts <- dplyr::select(districts, doctors, poverty, 
+                            pop, name, province, public_hospitals)
 
 
 ```
+
 
 
 
@@ -44,18 +57,37 @@ localities <- dplyr::select(localities, doctors, poverty,
 
 Your task is to model the number of doctors in Pakistan based on poverty levels.
 
-- **localities:** Information about different geographic districts, i.e. cities, of Pakistan. This was taken from Kaggle (1), which extracted the data from Open Data Pakistan (2).
+- **districts:** Information about different geographic districts of Pakistan. This was taken from Kaggle (1), which extracted the data from Open Data Pakistan (2).
   - *doctors*, the number of doctors in a district. Our response variable.
-  - *labor*, the size of the labor force.
+  - *pop*, the size of the pop force.
   - *poverty*, a poverty index
   - *province*, a larger geographic region. Just like each state has multiple cities in the US, each province has multiple districts in Pakistan. This will be useful in visualizing how numbers vary across provinces.
   
 :::
 
-```{r}
+## What is a district and province?
 
+Terms for geographical divisions in Pakistan differ from those used in the United States. The United States has ~50 states; within each state, there are multiple cities. Similar to states, the Pakistani government refers to larger regions as provinces. While there are historically 4 official provinces in Pakistan, there are two additional regions with special status and the capital territory, so there are seven regions that can be considered provinces. For this analysis, we will consider there to be [7 provinces](https://pakistan.gov.pk/provinces). In each province, there are multiple districts. 
 
-library(grid)
+```{r warning=FALSE}
+
+pakistan <- st_read("data/geoBoundaries-PAK-ADM1.shp", quiet = TRUE)
+ggplot(pakistan) +
+  geom_sf() +
+  geom_label_repel(
+    aes(label = shapeName, geometry = geometry),
+    stat = "sf_coordinates",  # computes centroids for label placement
+    size = 3,
+    box.padding = 0.3,
+    label.size = 0.2,        # border thickness of white box
+    label.r = unit(0.15, "lines"),  # corner radius
+    fill = "white",           # box background color
+    color = "black"           # text color
+  )
+
+```
+
+```{r echo=FALSE}
 
 grid.newpage()
 
@@ -77,7 +109,7 @@ grid.roundrect(x = 0.25, y = 0.5, width = 0.4, height = 0.6,
                r = unit(0.05, "snpc"))
 
 # Label for outer box 1
-grid.text("State", x = 0.25, y = 0.77, 
+grid.text("State", x = 0.25, y = 0.73, 
           gp = gpar(fontsize = 12, fontface = "bold", col = "#444444"))
 
 # Inner box 1
@@ -97,7 +129,7 @@ grid.roundrect(x = 0.75, y = 0.5, width = 0.4, height = 0.6,
                r = unit(0.05, "snpc"))
 
 # Label for outer box 2
-grid.text("Province", x = 0.75, y = 0.77, 
+grid.text("Province", x = 0.75, y = 0.73, 
           gp = gpar(fontsize = 12, fontface = "bold", col = "#444444"))
 
 # Inner box 2
@@ -122,7 +154,7 @@ determined how to do grid nested boxes from this conversation: https://chatgpt.c
 Students can simply do a bar plot with number of doctors versus province as shown below:
 
 ```{r warning=FALSE}
-ggplot(localities, aes(x = province, y = doctors, fill = province)) +
+ggplot(districts, aes(x = province, y = doctors, fill = province)) +
   geom_col(show.legend = FALSE) +
   labs(
     title = "Number of Doctors by Province",
@@ -139,14 +171,9 @@ ggplot(localities, aes(x = province, y = doctors, fill = province)) +
 
 Alternatively, here's another visualization students can make:
 
-```{r warning=FALSE}
 
-pakistan <- st_read("data/geoBoundaries-PAK-ADM1.shp", quiet = TRUE)
-
-
-```
 ```{r}
-provinces <- localities |>
+provinces <- districts |>
   group_by(province) |>
   summarise(
     doctors = sum(doctors)
@@ -167,14 +194,21 @@ pak <- left_join(pakistan, provinces, by = c("shapeName" = "province"))
 ```{r}
 ggplot(pak) +
   geom_sf(aes(fill = doctors)) +
-  theme_minimal()
+  theme_minimal() +
+  labs(
+    x ="Longitude (in degrees)",
+    y = "Latitude (in degrees)", 
+    title = "Map of Pakistan",
+    subtitle = "Colored by Number of Doctors per Province", 
+    fill = "Number of Doctors"
+  )
 ```
 
 Things to notice: 
 
-  - Missing data: We don't have information for number of doctors in a couple of provinces. 
+  - Missing data: Dark grey is the default when there is an NA for the number of doctors in a province. We don't have information for number of doctors in a couple of provinces. Not Punjab is dark gray as well as Gilgit Baltistan and Islamabad Capital Territory.
 
-  - Number of Doctors: There are the highest number of doctors in KPK and Sindh. 
+  - Number of Doctors: The blue shading helps shed light into number of doctors with lighter blue representing more doctors. There are the highest number of doctors in KPK and Sindh. 
 
 
 \newpage
@@ -184,14 +218,16 @@ Poisson is a good option when looking for counts because it will be defined on n
 
 
 ::: {.callout-note title="Additional Instructions."}
-Before proceeding, we will remove observations where data is missing for doctors, labor, and poverty. This involves assuming that the observations are missing at random, but this criteria may not hold. For the sake of this analysis, we will proceed like this. Please incorporate the below code chunk into your code. 
+Before proceeding, we will remove observations where data is missing for doctors, pop, and poverty. This involves assuming that the observations are missing at random, but this criteria may not hold. For the sake of this analysis, we will proceed like this. Please incorporate the below code chunk into your code. 
 :::
 
 
 ```{r}
-localities <- localities |>
+
+districts_two <- districts
+districts <- districts |>
   filter(!is.na(doctors)) |>
-  filter(!is.na(labor)) |>
+  filter(!is.na(pop)) |>
   filter(!is.na(poverty))
 ```
 
@@ -199,8 +235,8 @@ localities <- localities |>
 **Question 3: Is there evidence of overdispersion? Check for it and if there is, suggest how we might correct for it. **
 
 ```{r}
-mean(localities$doctors)
-var(localities$doctors)
+mean(districts$doctors)
+var(districts$doctors)
 ```
 There is evidence of overdispersion since the empirical variance exceeds the mean. 
 
@@ -214,7 +250,7 @@ To correct for this, it may be useful to either utilize negative binomial regres
 
 **Question 4: Could an offset be useful in our goal to analyze covariates related to number of doctors?**
 
-An offset is useful because more populous areas naturally have more doctors; thus, we use labor force size as the offset.
+An offset is useful because more populous areas naturally have more doctors; thus, we use pop force size as the offset.
 
 \newpage
 **Question 5: Depending on your answer for question 2, fit a model using either the regular Poisson (without inflating standard errors) or the negative binomial. Make a choice to include an offset depending on question 4. Your model should incorporate the covariate poverty. If you do include an offset, remember that log(0) is undefined and this may mean some data filtering is needed beforehand.**
@@ -222,14 +258,15 @@ An offset is useful because more populous areas naturally have more doctors; thu
 
 
 ```{r}
-loca_new <- localities |>
-  filter(labor != 0)
+loca_new <- districts |>
+  filter(pop != 0)
 ```
 
 ```{r warning=FALSE}
-model <- glm.nb(doctors ~ poverty + offset(log(labor)), data = loca_new)
+model <- glm.nb(doctors ~ poverty + offset(log(pop)), data = loca_new)
 
-tidy(model, conf.int = TRUE)
+tidy(model, conf.int = TRUE) |>
+  kable(digits = 3)
 
 ```
 
@@ -237,9 +274,9 @@ tidy(model, conf.int = TRUE)
 
 **Question 6: Interpret the effect of poverty. **
 
-The p-value is low. For each increase in the poverty index by one unit, the expected rate of doctors per labor population in a district will change by a multiplicative factor of `{r} exp(-1.54)`. This means we expect the number of doctors to decrease by 78.6% for each point increase in poverty index. 
+The p-value is low. For each increase in the poverty index by one unit, the expected rate of doctors per pop population in a district will change by a multiplicative factor of `{r} exp(-1.54)`. This means we expect the number of doctors to decrease by 78.6% for each point increase in poverty index. 
 
-There are no poverty index values with a one point difference since the poverty index appears to occur between 0 and 1. It may be more meaningful to make interpretations for each 0.1 point increase in the poverty index. For example, the expected rate of doctors per labor population in a district will change by a multiplicative factor of `{r} exp(-1.54*0.1)`. This means we expect the number of doctors to decrease by 14.3% for each 0.1 point increase in poverty index.
+There are no poverty index values with a one point difference since the poverty index appears to occur between 0 and 1. It may be more meaningful to make interpretations for each 0.1 point increase in the poverty index. For example, the expected rate of doctors per pop population in a district will change by a multiplicative factor of `{r} exp(-1.54*0.1)`. This means we expect the number of doctors to decrease by 14.3% for each 0.1 point increase in poverty index.
 
 ```{r}
 min(loca_new$poverty)
@@ -247,8 +284,79 @@ min(loca_new$poverty)
 max(loca_new$poverty)
 ```
 
+**Question 7: Create a visualization and summary table to verify or reject the following statement: Districts with public hospitals in Pakistan have more similar doctor-to-pop force ratios than those without public hospitals**
+```{r}
+districts |>
+  mutate(
+    doctor_to_pop = doctors/pop
+  ) |>
+ggplot(aes(x = factor(public_hospitals), y = doctor_to_pop)) +
+  geom_boxplot()
+```
+
+
+
+**Question 7: Create a visualization and summary table to verify or reject the following statement: Districts in the same province in Pakistan have more similar doctor-to-pop force ratios than those in different provinces.**
+
+```{r}
+districts_two |>
+  mutate(
+    doctor_to_pop = doctors/pop
+  ) |>
+  ggplot(aes(x = doctor_to_pop)) +
+  geom_histogram() +
+  facet_wrap(~province)
+```
+
+
+
+```{r}
+districts_two |>
+  mutate(
+    doctor_to_pop = doctors/pop
+  ) |>
+ggplot(aes(x = province, y = doctor_to_pop)) +
+  geom_boxplot()
+```
+
+
+```{r}
+model <- glmmTMB(
+  doctors ~ poverty + offset(log(pop)) + (1 | province),
+  data = districts,
+  family = nbinom2
+)
+
+tidy(model, conf.int = TRUE) |>
+  kable(digits = 3)
+```
+
+
+
+6. To go a bit extra, it would be great to talk a bit about multi-level models as this seems like a great type of application that could be used for these. You might think about how to integrate a few of these questions if you have time. 
+
+Here are some ideas that might be interesting:
+
+Some initial questions for multi-level models: 
+What are the primary variables considered? 
+What are the level one and level two observational units? 
+What variables are measured at each level? 
+
+Some EDA suggestions, some of which you have already implemented in your assignment: 
+1. Explore general association between the predictor and response variable
+2. Explore whether subjects at a given level of the predictor tend to have similar mean responses
+3. Explore whether variation in response differs at different levels of a predictor
+There are a two main ways we can visualize these associations:
+- A plot of the response versus the predictor for individual observations (meaning treat the observations as independent). 
+- Separate plots of responses versus predictors for each of the level two observations, which is known as a lattice plot. 
+
+Based upon these, can you come up with a proposed composite model and write this out. You may want to guide the student through this and help them with it as we have seen it’s a bit challenging. Focus on some simplicity and a basic approach. 
+
 
 References
+
+
+(1) https://opendata.com.pk/organization/about/sdpi
 
 (1) https://www.kaggle.com/datasets/alikhan83/pakistan-district-profile
 

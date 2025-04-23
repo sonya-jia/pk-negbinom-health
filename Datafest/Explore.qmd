@@ -1,0 +1,481 @@
+---
+title: "Explore"
+author: "Sonya Eason"
+format: pdf
+editor: visual
+---
+
+```{r}
+library(tidyverse)
+library(patchwork)
+library(lmerTest)
+library(knitr)
+library(broom)
+```
+
+
+```{r}
+unemployment <- read_csv("data/Unemployment.csv")
+price <- read_csv("data/Price and Availability Data.csv")
+occupancy <- read_csv("data/Major Market Occupancy Data-revised.csv")
+leases <- read_csv("data/Leases.csv")
+```
+
+
+```{r}
+colnames(leases)
+```
+
+```{r}
+colnames(unemployment)
+```
+
+
+
+
+
+
+Idea of specific question:
+
+The Charlotte metro area has vastly weaker healthcare infrastructure than the research triangle, which has the presence of three strong univeristies and multiple medical schools. Over the past couple years, construction has been done in Charlotte, NC to build what is now being referred to as "The Pearl: Medical Innovation District". 
+
+Healthcare related firms needs guidance on where to relocate, so we ..
+
+
+Need an outcome!!!!!! --> need some latent variable representation of benefit - think about before looking at data
+
+
+
+Idea 2: Can we detect duplicates
+
+```{r}
+charlotte <- leases |>
+  filter(market == "Charlotte") 
+```
+
+
+Are healthcare companies planning for long term
+```{r}
+charlotte |>
+  filter(!is.na(transaction_type)) |>
+  group_by(internal_industry) |>
+  summarize(
+    prop_renewal = sum(transaction_type == "Renewal") / n()
+  )
+```
+
+Construction, Engineering and Architecture firms and Government firms seem to have the greatest proportion of renewals.
+
+Is renewal indicative of success?
+
+-Could be worth exploring if we develop success metric. 
+---
+
+```{r}
+leases |>
+  group_by(internal_industry) |>
+  summarise(subProp = mean(sublet_availability_proportion))
+```
+
+```{r}
+rdu <- leases |>
+  filter(market == "Raleigh/Durham") 
+
+rdu|>
+  filter(!is.na(transaction_type)) |>
+  group_by(internal_industry) |>
+  summarize(
+    prop_renewal = sum(transaction_type == "Renewal") / n()
+  )
+```
+
+Maybe we could ask questions about who bys for long terms. --> for example, are certain industries tending to buy for long term vs not.
+
+
+```{r}
+nc <- leases |>
+  filter(market %in% c("Charlotte", "Raleigh/Durham"))
+```
+
+```{r}
+nc |>
+  filter(internal_industry == c("Healthcare", "Government", "Construction, Engineering and Architecture", "Retail")) |>
+ggplot(aes(x = internal_industry, fill = transaction_type)) +
+  geom_bar(position = "dodge") +
+  facet_wrap(~ market) +
+  labs(
+    x = "Internal Industry",
+    y = "Count",
+    fill = "Transaction Type",
+    title = "Transaction Type by Industry and Market"
+  ) +
+  theme_minimal() +
+  theme(
+    axis.text.x = element_text(angle = 45, hjust = 1)
+  )
+```
+
+Renewal seems to be success = who wants long term
+How does industry affect number of renewals. --> maybe lookat number of renewals by company
+
+
+number of renewals related to success --> benefit definition determined by cost/etc
+
+
+Number of renewals - Poisson
+
+```{r eval = FALSE}
+library(stringdist)
+
+# Compare names in a column
+dist_mat <- stringdistmatrix(charlotte$building_id, charlotte$building_id, method = "jw")
+similar_pairs <- which(dist_mat < 0.1 & dist_mat > 0, arr.ind = TRUE)
+
+# Show potential duplicates
+potDup <- data.frame(
+  name1 = charlotte$building_id[similar_pairs[,1]],
+  name2 = charlotte$building_id[similar_pairs[,2]],
+  similarity = 1 - dist_mat[similar_pairs]
+)
+```
+
+
+```{r eval = FALSE} 
+potDup
+```
+
+
+
+
+```{r}
+leases |>
+  filter(!is.na(overall_rent))
+  
+```
+
+
+```{r}
+leases |>
+  count(company_name, sort = TRUE)
+
+
+```
+
+
+
+
+
+
+preliminary idea that uses data available on census (the data about college graduates in each county and number of works in certain industries and how much they're paid)
+
+$$
+benefit = labor*cheap\_labor
+$$
+
+$$
+labor = labor\_ availability
+$$
+
+
+
+
+$$
+cheap\_labor = mean(labor\_cost) * (1-var(labor\_cost))
+$$
+
+-normalize such a metric so it makes sense to do an LLM on. 
+Make a better metric ^^ but we can easily get this all from census site
+
+US Census Data - Relevant
+
+-define
+success
+The data providers market values of rent for each of these locations in general. We want to determine if it is actually more beneficial to ....
+
+We take information from the United States Census, namely the population of _____
+
+to generate a cost metric 
+
+Given that the availability data from nc is 5738 samples, we can perform 
+
+Approach ideas
+-sample from posterior (it is technical but we can convey this in a very non-technical way --> more interpretable)
+
+
+
+As consultants, we want to give insight about the past 
+
+There are 29 markets. We want to advise a niche group of firms, NC healthcare related, where to relocate.
+The research triangle park is the premier location for highly educated healthcare workers, but we wonder how much a company can save based on regional and 
+
+
+
+```{r}
+nc_markets <- c("Charlotte", "Raleigh/Durham")
+nc <- leases |>
+  filter(market %in% nc_markets)
+```
+
+```{r}
+nc |>
+  group_by(market) |>
+  count()
+```
+```{r}
+nc |>
+  group_by(overall_rent) |>
+  count()
+```
+
+
+
+
+
+
+
+-We will consider college graduates from US Census
+
+-We will also consider how much the income of healthcare workers is by region. 
+
+There are multiple sectors. Where should we advise healthcare offices to located
+12 markets. Where should healthcare firms relocate
+
+
+
+
+```{r}
+leases |>
+  group_by(company_name) |>
+  count() |>
+  arrange(desc(n))
+```
+We will assume the data is missing at random and thus ignorable and consider only companies where data is known
+
+
+```{r}
+leases$date <- paste(leases$year, leases$monthsigned, sep = "-")
+```
+
+At least 1253 leases are for healthcare related firms.
+
+```{r}
+leases |>
+  group_by(internal_industry) |>
+  count()
+```
+
+Can assume missing at random.
+
+
+```{r}
+hc <- leases |>
+  filter(internal_industry == "Healthcare")
+```
+
+
+
+Subject to economic changes on a monthly basis so we will account for this through mixture where each date (month-year) lease is separate.
+
+Use the actual metric here when I create it. 
+
+#we could also do a subset of the markets like only Charlotte vs Raleigh/Durham
+
+#the below example is not a subset
+
+```{r}
+unique(leases$market)
+```
+markets - count of markets } 
+
+Thresholding the cost of labor vs type of labor vs amount of labor. 
+
+Poisson()
+
+
+```{r}
+ggplot(price, )
+```
+
+
+```{r}
+char
+```
+
+
+number of leases }
+
+
+
+
+
+
+
+
+```{r}
+
+```
+
+
+*does DF-squared leas
+```{r}
+leases <- leases |>
+  mutate(sqftHundred = leasedSF/1000,
+         subProp = sublet_availability_proportion*100)
+  
+```
+
+
+
+```{r}
+mod <- lmerTest::lmer(
+  leasedSF ~ internal_industry + (1|date),  
+  data = leases
+)
+
+```
+
+```{r}
+# Extract fixed effects
+fixed_effects <- fixef(mod)
+
+# Convert fixed effects into a data frame for ggplot
+fixed_effects_df <- data.frame(
+  Term = names(fixed_effects),
+  Estimate = fixed_effects
+)
+
+# Create the plot
+ggplot(fixed_effects_df, aes(x = Term, y = Estimate)) +
+  geom_bar(stat = "identity", fill = "skyblue") +
+  theme_minimal() +
+  labs(title = "Fixed Effects from the Mixed Model", 
+       x = "Fixed Effect Term", 
+       y = "Estimate") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+```
+
+
+
+
+
+
+```{r}
+
+library(ggeffects)
+library(ggplot2)
+```
+
+
+```{r}
+
+
+# Get predicted values for market
+preds <- ggpredict(mod, terms = "market")
+
+# Plot
+plot(preds) + 
+  ggtitle("Predicted leasedSF by Market") +
+  theme_minimal() +
+  theme(
+    axis.text.x = element_text(angle = 45, hjust = 1)
+  )
+
+```
+```{r}
+leases |>
+  filter(!is.na(sublet_availability_proportion)) |>
+  group_by(market) |>
+  summarize(
+    averageLeased = mean(leasedSF),
+    subletProp = first(sublet_availability_proportion)
+  )|>
+  arrange(desc(subletProp))
+```
+
+
+
+
+
+```{r}
+re <- ranef(mod)$date
+re_df <- data.frame(date = rownames(re), intercept = re[,1])
+
+# Plot
+ggplot(re_df, aes(x = reorder(date, intercept), y = intercept)) +
+  geom_bar(stat = "identity") +
+  coord_flip() +
+  labs(title = "Random Intercepts by Date", x = "Date", y = "Random Effect (Intercept)") +
+  theme_minimal()
+```
+
+
+
+We can actually do the Bayesian equivalent pretty easily with STAN I think ^^ (just may help with interpretation)
+
+
+verify assumptions
+-_____
+
+
+
+
+
+
+Question
+
+
+Building Quality --> A is high quality, O is other
+
+What makes a building high-quality?
+
+```{r}
+leases <- leases |>
+  mutate(quality= if_else(internal_class == "A", 1, 0))
+```
+
+
+```{r}
+
+rr_model <- glm(quality ~ market + leasedSF, data = leases, 
+                    family = binomial)
+
+tidy(rr_model, conf.int = TRUE) |>
+  kable(digits = 3)
+```
+
+
+$H_0: $
+
+```{r}
+hist(leases$internal_class)
+```
+```{r}
+ggplot(leases, aes(x=internal_class, y=direct_overall_rent)) +
+  geom_boxplot() +
+  facet_wrap(~market)
+```
+There are some buildings designated as high quality. I wonder if they're more expensive, and if so, they're worthwhile.
+
+
+
+
+
+```{r}
+
+```
+
+
+```{r}
+ggplot(leases, aes(x=internal_class, y = direct_overall_rent)) +
+  geom_bar()
+```
+
+```{r}
+leases |>
+  group_by(internal_class) |>
+  count()
+```
+
+
+
+
