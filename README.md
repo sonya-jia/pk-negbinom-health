@@ -1,85 +1,62 @@
-# PK Health Analysis: Modeling Doctors and Poverty in Pakistan
+# Pakistan Healthcare Analysis: Multilevel Poisson Model
 
-This project investigates how poverty relates to the distribution of doctors across districts in Pakistan, using Poisson and multilevel regression models to account for geographic variation.
-
----
-
-## Project Overview
-
-Using data from the Sustainable Development Policy Institute (SDPI), this analysis models healthcare access through the lens of doctor availability and socio-economic conditions. We focus on:
-
-- Understanding the impact of poverty on healthcare workforce distribution  
-- Visualizing geographic disparities across provinces and districts  
-- Applying appropriate count data models to reveal meaningful insights  
-
-Our goal is to blend rigorous statistical modeling with spatial understanding to inform public health discussions in Pakistan.
+This project explores the distribution of doctors across Pakistan’s districts using multilevel Poisson regression models, incorporating poverty and population data.
 
 ---
 
-## Tools & Technologies
+## Overview
 
-- **R** with `tidyverse` for data manipulation and visualization  
-- `sf` for handling geographic shapefiles and maps  
-- `glmmTMB` and `MASS` for Poisson and negative binomial regression modeling  
-- `ggplot2` and `ggrepel` for clean and informative plots  
-
----
-
-## Data Sources
-
-- [Pakistan District Profiles](https://opendata.com.pk/dataset/district-profiles-all-districts-of-pakistan) (SDPI)  
-- [Kaggle Dataset](https://www.kaggle.com/datasets/alikhan83/pakistan-district-profile) (aggregated data)  
+- Modeling doctor counts by district and province
+- Using negative binomial regression for overdispersed count data
+- Visualizing geographic disparities in healthcare access
 
 ---
 
-## Getting Started
+## Visualizations
 
-1. Clone this repository  
-2. Ensure the `data/` folder contains all necessary CSV and shapefile components  
-3. Run the provided R Markdown analysis file to reproduce all results and visualizations  
+### Map of Pakistan Provinces
 
----
+![Map of Pakistan Provinces](https://upload.wikimedia.org/wikipedia/commons/thumb/3/32/Provinces_of_Pakistan.svg/600px-Provinces_of_Pakistan.svg.png)
 
-## Visual Highlights
-
-### Map of Pakistan Provinces  
-![Map of Pakistan Provinces](images/pakistan_provinces_map.png)  
-*Spatial visualization of the 7 provinces and their districts.*
+*Source: Wikimedia Commons*
 
 ---
 
-### Number of Doctors by Province  
-![Doctors by Province Bar Plot](images/doctors_by_province.png)  
-*Bar plot showing the distribution of doctors across provinces.*
+### Doctors by Province (Example Bar Plot)
+
+![Doctors by Province](https://raw.githubusercontent.com/plotly/datasets/master/2014_usa_states.csv)
+
+*Note: Replace with your actual plot image*
 
 ---
 
-### Multilevel Model Overview  
-![Multilevel Model Diagram](images/multilevel_model_diagram.png)  
-*Conceptual diagram illustrating the multilevel modeling approach accounting for district and province variation.*
+### Multilevel Model Structure (Conceptual Diagram)
+
+![Multilevel Model](https://upload.wikimedia.org/wikipedia/commons/9/99/Multilevel-model-structure.svg)
+
+*Source: Wikimedia Commons*
 
 ---
 
-## Unique Aspect
+## How to Run
 
-This project combines multilevel modeling with geographic visualization to capture both numerical and spatial dimensions of healthcare inequality — revealing patterns that might otherwise remain hidden in aggregated data.
-
----
-
-## Acknowledgments
-
-Thanks to SDPI and the open data community for making this rich dataset publicly accessible, enabling meaningful research.
+1. Clone this repo
+2. Load data and shapefiles (shapefiles should be placed in `data/` folder)
+3. Run the R markdown file `Quiz4_analysis.Rmd` to reproduce the analysis and figures
 
 ---
 
-## About
+## References
 
-Analysis was refined with the help of AI-assisted tools to enhance clarity and visualization, aiming to provide a seamless and insightful research experience.
-
----
-
-⭐ If you find this project helpful, please consider starring the repository!
+- Data: [Kaggle - Pakistan District Profile](https://www.kaggle.com/datasets/alikhan83/pakistan-district-profile)
+- Source Data: [Open Data Pakistan](https://opendata.com.pk/dataset/district-profiles-all-districts-of-pakistan)
 
 ---
 
-Happy analyzing.  
+## License
+
+MIT License
+
+---
+
+*Made with care by Sonya Eason*  
