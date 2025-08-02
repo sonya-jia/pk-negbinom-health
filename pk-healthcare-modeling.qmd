@@ -1,5 +1,5 @@
 ---
-title: "Quiz 4"
+title: "Pakistan Healthcare Analysis"
 format: 
   pdf:
     fig-height: 4
@@ -14,7 +14,6 @@ The data was collected by the Sustainable Development Policy Institute (SDPI), w
 :::
 
 ```{r message=FALSE, warning=FALSE}
-
 library(sf)
 library(tidyverse)
 library(MASS)
@@ -55,7 +54,7 @@ districts <- dplyr::select(districts, doctors, poverty,
 
 ::: {.callout-note title="Introduction to the Data."}
 
-Your task is to model the number of doctors in Pakistan based on poverty levels.
+My task is to model the number of doctors in Pakistan based on poverty levels.
 
 - **districts:** Information about different geographic districts of Pakistan. Dataset was taken from Kaggle (1), which extracted the data from Open Data Pakistan (2).
   - *doctors*, the number of doctors in a district. Our response variable.
@@ -152,11 +151,10 @@ grid.text("District", x = 0.75, y = 0.5,
 \newpage
 
 
-## Questions: Student Turn
+## Analysis
 
-**Question 1: Make a visualization highlighting number of doctors in each of Pakistan's 7 provinces. What do you notice? Optional: Feel free to find geographic identification data online, if you're interested n creating a map visual.**
+**Below, I made visualizations highlighting number of doctors in each of Pakistan's 7 provinces. What do you notice?**
 
-Students can simply do a bar plot with number of doctors versus province as shown below:
 
 ```{r warning=FALSE}
 ggplot(districts, aes(x = province, y = doctors, fill = province)) +
@@ -173,8 +171,6 @@ ggplot(districts, aes(x = province, y = doctors, fill = province)) +
   )
 ```
 
-
-Alternatively, here's another visualization students can make:
 
 
 ```{r}
@@ -217,13 +213,13 @@ Things to notice:
 
 
 \newpage
-**Question 2: What kind of model may be well suited for the task? Why?**
+**What kind of model may be well suited for the task? Why?**
 
 Poisson is a good option when looking for counts because it will be defined on non-negative integers, among other reasons. 
 
 
-::: {.callout-note title="Additional Instructions."}
-Before proceeding, we will remove observations where data is missing for doctors, pop, and poverty. This involves assuming that the observations are missing at random, but this criteria may not hold. For the sake of this analysis, we will proceed like this. Please incorporate the below code chunk into your code. 
+::: {.callout-note title="Additional Actions."}
+Before proceeding, we will remove observations where data is missing for doctors, pop, and poverty. This involves assuming that the observations are missing at random, but this criteria may not hold. For the sake of this analysis, we will proceed like this.
 :::
 
 
@@ -237,7 +233,7 @@ districts <- districts |>
 ```
 
 \newpage
-**Question 3: Is there evidence of overdispersion? Check for it and if there is, suggest how we might correct for it. **
+**Is there evidence of overdispersion? Check for it and if there is, suggest how we might correct for it. **
 
 ```{r}
 mean(districts$doctors)
@@ -253,12 +249,12 @@ To correct for this, it may be useful to either utilize negative binomial regres
 
 \newpage
 
-**Question 4: Could an offset be useful in our goal to analyze covariates related to number of doctors?**
+**Could an offset be useful in our goal to analyze covariates related to number of doctors?**
 
 An offset is useful because more populous areas naturally have more doctors; thus, we use population size as the offset.
 
 \newpage
-**Question 5: Depending on your answer for question 2, fit a model using either the regular Poisson (without inflating standard errors) or the negative binomial. Make a choice to include an offset depending on question 4. Your model should incorporate the covariate poverty. If you do include an offset, remember that log(0) is undefined and this may mean some data filtering is needed beforehand.**
+**Below, I fit a negative binomial model. Regular Poisson is insufficient due to overdispersion.**
 
 
 
@@ -277,7 +273,7 @@ tidy(model, conf.int = TRUE) |>
 
 \newpage
 
-**Question 6: Interpret the effect of poverty. **
+**What's the effect of poverty? **
 
 The p-value is low. For each increase in the poverty index by one unit, the expected rate of doctors per person in a population in a district will change by a multiplicative factor of `{r} exp(-1.54)`. This means we expect the number of doctors per person in a population to decrease by 78.6% for each point increase in poverty index. 
 
@@ -289,14 +285,14 @@ min(loca_new$poverty)
 max(loca_new$poverty)
 ```
 \newpage
-**Question 7: Are there obvious level one and level two observational units?**
+**I want to think about multilevel modeling. First I ask the following question: Are there obvious level one and level two observational units?**
 
 
 The level one observational unit is a district and the level two observational unit is the province. 
 
 \newpage
 
-**Question 8: Create a visualization to explore the following statement: Districts in the same province in Pakistan have more similar doctor-to-population ratios than those in different provinces. Specifically, plot poverty vs the logarithm of doctors-to-population ratio for all observations. Then, make a visualization showing separate plots for each province.**
+**Then, I create a visualization to explore the following statement: Districts in the same province in Pakistan have more similar doctor-to-population ratios than those in different provinces. Specifically, I plot poverty vs the logarithm of doctors-to-population ratio for all observations. Then, I make a visualization showing separate plots for each province.**
 
 
 
@@ -353,7 +349,7 @@ districts |>
 
 \newpage
 
-**Question 9: Fit the multilevel version of the same model that takes into account the variation that occurs across provinces.**
+**Now, I fit the multilevel version of the same model that takes into account the variation that occurs across provinces.**
 
 
 ```{r}
@@ -367,7 +363,7 @@ tidy(model, conf.int = TRUE) |>
   kable(digits = 3)
 ```
 \newpage
-**Question 10: Which estimates are useful for interpretation?**
+**Which estimates are useful for interpretation?**
 
 The fixed intercept and fixed effect of poverty. 
 
